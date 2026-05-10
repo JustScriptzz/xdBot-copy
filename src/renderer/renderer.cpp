@@ -10,6 +10,7 @@
 #include <Geode/modify/GJBaseGameLayer.hpp>
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/ShaderLayer.hpp>
+#include <Geode/ui/GeodeUI.hpp>
 
 #ifdef GEODE_IS_WINDOWS
 #include "../utils/subprocess.hpp"
@@ -23,14 +24,14 @@ bool m_cbsWasEnabled;
 class $modify(CCParticleSystem) {
     void initParticle(sCCParticle* p0) {
         CCParticleSystem::initParticle(p0);
-        
+
         if (!Mod::get()->getSavedValue<bool>("render_hide_levelcomplete")) return;
-        
+
         if (auto particle = typeinfo_cast<CCParticleSystemQuad*>(this)) {
             PlayLayer* pl = PlayLayer::get();
             if (!pl) return;
             if (this->getParent() != pl) return;
-            
+
             particle->setVisible(false);
         }
     }
@@ -50,14 +51,14 @@ class $modify(CCCircleWave) {
 class $modify(PlayLayer) {
     void showCompleteText() {
         PlayLayer::showCompleteText();
-        
+
         if (!Global::get().renderer.recording) return;
-        
+
         if (m_levelEndAnimationStarted && Mod::get()->getSavedValue<bool>("render_hide_levelcomplete")) {
-                const char* spriteName = m_isPracticeMode ? 
-                    "GJ_practiceComplete_001.png" : 
+                const char* spriteName = m_isPracticeMode ?
+                    "GJ_practiceComplete_001.png" :
                     "GJ_levelComplete_001.png";
-                
+
             if (auto* node = getChildBySpriteFrameName(this, spriteName)) {
                 node->stopAllActions();
                 node->setVisible(false);
@@ -187,7 +188,16 @@ bool Renderer::toggle() {
     auto gm = GameManager::sharedState();
     auto cbf = Loader::get()->getLoadedMod("syzzi.click_between_frames");
     if (cbf && !cbf->getSettingValue<bool>("soft-toggle")) {
-        FLAlertLayer::create("Render", "Disable CBF in Geode to render a level.", "OK")->show();
+        geode::createQuickPopup(
+            "Render",
+            "Disable <cr>CBF</c> in Geode to render a level.",
+            "Close", "Disable",
+            [](auto, bool btn2) {
+                if (btn2) {
+                    cbf->setSettingValue<bool>("soft-toggle", false);
+                }
+            }
+        );
         return false;
     }
 
@@ -228,9 +238,16 @@ bool Renderer::toggle() {
             g.renderer.ffmpegPath = geode::utils::string::pathToString(ffmpegSettingPath);
 #else
         if (!foundApi) {
-            FLAlertLayer::create("Error",
-                "The <cl>eclipse.ffmpeg-api</c> mod is required for rendering on this platform.",
-                "OK")->show();
+            geode::createQuickPopup(
+                "Error",
+                "The <cl>FFmpeg API</c> mod is required for rendering on this platform.",
+                "Close", "Open Mod Page",
+                [](auto, bool btn2) {
+                    if (btn2) {
+                        geode::openInfoPopup("eclipse.ffmpeg-api");
+                    }
+                }
+            );
             return false;
         }
 #endif
@@ -291,7 +308,7 @@ void Renderer::fixUIObjects() {
     auto pl = PlayLayer::get();
     if (!pl) return;
 
-    for (auto obj : CCArrayExt<GameObject*>(pl->m_objects)) {
+    for (auto obj : pl->m_objects->asExt<GameObject>()) {
         auto it = pl->m_uiObjectPositions.find(obj->m_uniqueID);
         if (it == pl->m_uiObjectPositions.end()) continue;
         obj->setStartPos(it->second);

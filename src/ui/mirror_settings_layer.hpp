@@ -21,19 +21,12 @@ class MirrorSettingsLayer : public geode::Popup {
         CCMenu *menu = CCMenu::create();
         m_mainLayer->addChild(menu);
 
-        CCSprite *spriteOn =
-            CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
-        CCSprite *spriteOff =
-            CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
-
         CCLabelBMFont *lbl = CCLabelBMFont::create("Inverted", "bigFont.fnt");
         lbl->setPosition({17, -0});
         lbl->setScale(0.5f);
         menu->addChild(lbl);
 
-        CCMenuItemToggler *toggle = CCMenuItemToggler::create(
-            spriteOff, spriteOn, this,
-            menu_selector(RecordLayer::toggleSetting));
+        CCMenuItemToggler *toggle = CCMenuItemExt::createTogglerWithStandardSprites(0.875f, [this](CCMenuItemToggler *sender) { RecordLayer::toggleSetting(sender); });
         toggle->setPosition({-47, -0});
         toggle->setScale(0.875f);
         toggle->toggle(

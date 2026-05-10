@@ -60,8 +60,6 @@ void Macro::recordFrameFix(int frame, PlayerObject* p1, PlayerObject* p2) {
     p1Data.rotation = p1Rotation;
     p1Data.yVelocity = p1->m_yVelocity;
     p1Data.xVelocity = p1->m_platformerXVelocity;
-    p1Data.isDashing = p1->m_isDashing;
-    p1Data.isOnGround = p1->m_isOnGround;
 
     gdr_legacy::FrameData p2Data;
     if (p2) {
@@ -69,8 +67,6 @@ void Macro::recordFrameFix(int frame, PlayerObject* p1, PlayerObject* p2) {
         p2Data.rotation = p2Rotation;
         p2Data.yVelocity = p2->m_yVelocity;
         p2Data.xVelocity = p2->m_platformerXVelocity;
-        p2Data.isDashing = p2->m_isDashing;
-        p2Data.isOnGround = p2->m_isOnGround;
     }
 
     Global::get().macro.frameFixes.push_back({frame, p1Data, p2Data});
@@ -179,12 +175,13 @@ void Macro::updateTPS() {
     auto& g = Global::get();
 
     if (g.state != state::none && !g.macro.inputs.empty()) {
-        g.previousTpsEnabled = g.tpsEnabled;
-        g.previousTps = g.tps;
+        if (g.previousTps == 0.f) {
+            g.previousTpsEnabled = g.tpsEnabled;
+            g.previousTps = g.tps;
+        }
 
+        g.setTps(g.macro.framerate);
         g.setTpsEnabled(g.macro.framerate != 240.f);
-        if (g.tpsEnabled)
-            g.setTps(g.macro.framerate);
 
     } else if (g.previousTps != 0.f) {
         g.setTpsEnabled(g.previousTpsEnabled);

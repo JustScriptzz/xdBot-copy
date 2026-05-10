@@ -47,8 +47,6 @@ struct FrameData {
     bool rotate = true;
     double yVelocity = 0.0;
     double xVelocity = 0.0;
-    bool isDashing = false;
-    bool isOnGround = false;
 };
 
 struct FrameFix {

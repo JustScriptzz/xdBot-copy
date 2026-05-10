@@ -318,10 +318,7 @@ bool RenderSettingsLayer::init() {
     fadeInInput->getInputNode()->setAllowedChars("0123456789.");
     menu->addChild(fadeInInput);
 
-    CCMenuItemToggler *toggle = CCMenuItemToggler::create(
-        CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"),
-        CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"), this,
-        menu_selector(RecordLayer::toggleSetting));
+    CCMenuItemToggler *toggle = CCMenuItemExt::createTogglerWithStandardSprites(0.555f, [this](CCMenuItemToggler *sender) { RecordLayer::toggleSetting(sender); });
     toggle->setPosition(ccp(130, -32));
     toggle->setScale(0.555);
     toggle->toggle(mod->getSavedValue<bool>("render_fade_in"));
@@ -344,10 +341,7 @@ bool RenderSettingsLayer::init() {
     fadeOutInput->getInputNode()->setAllowedChars("0123456789.");
     menu->addChild(fadeOutInput);
 
-    toggle = CCMenuItemToggler::create(
-        CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"),
-        CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"), this,
-        menu_selector(RecordLayer::toggleSetting));
+    toggle = CCMenuItemExt::createTogglerWithStandardSprites(0.555f, [this](CCMenuItemToggler *sender) { RecordLayer::toggleSetting(sender); });
     toggle->setPosition(ccp(130, -58));
     toggle->setScale(0.555);
     toggle->toggle(mod->getSavedValue<bool>("render_fade_out"));
@@ -361,10 +355,7 @@ bool RenderSettingsLayer::init() {
     lbl->setScale(0.325);
     menu->addChild(lbl);
 
-    toggle = CCMenuItemToggler::create(
-        CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"),
-        CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"), this,
-        menu_selector(RecordLayer::toggleSetting));
+    toggle = CCMenuItemExt::createTogglerWithStandardSprites(0.555f, [this](CCMenuItemToggler *sender) { RecordLayer::toggleSetting(sender); });
     toggle->setPosition(ccp(0, -32));
     toggle->setScale(0.555);
     toggle->toggle(mod->getSavedValue<bool>("render_hide_endscreen"));
@@ -378,10 +369,7 @@ bool RenderSettingsLayer::init() {
     lbl->setScale(0.25);
     menu->addChild(lbl);
 
-    toggle = CCMenuItemToggler::create(
-        CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"),
-        CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"), this,
-        menu_selector(RecordLayer::toggleSetting));
+    toggle = CCMenuItemExt::createTogglerWithStandardSprites(0.555f, [this](CCMenuItemToggler *sender) { RecordLayer::toggleSetting(sender); });
     toggle->setPosition(ccp(0, -58));
     toggle->setScale(0.555);
     toggle->toggle(mod->getSavedValue<bool>("render_hide_levelcomplete"));
@@ -417,15 +405,13 @@ bool RenderSettingsLayer::init() {
 
     ButtonSprite *spr = ButtonSprite::create("OK");
     spr->setScale(0.875);
-    CCMenuItemSpriteExtra *btn = CCMenuItemSpriteExtra::create(
-        spr, this, menu_selector(RenderSettingsLayer::close));
+    CCMenuItemSpriteExtra *btn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { RenderSettingsLayer::close(sender); });
     btn->setPosition(ccp(67, -83));
     menu->addChild(btn);
 
     spr = ButtonSprite::create("Restore Defaults");
     spr->setScale(0.375f);
-    btn = CCMenuItemSpriteExtra::create(
-        spr, this, menu_selector(RenderSettingsLayer::onDefaults));
+    btn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { RenderSettingsLayer::onDefaults(sender); });
     btn->setPosition({211, -106});
     menu->addChild(btn);
 

@@ -175,26 +175,26 @@ class $modify(EndLevelLayer) {
         auto& g = Global::get();
 
         if (g.mod->getSettingValue<bool>("endscreen_button")) {
-			cocos2d::CCSize winSize = CCDirector::sharedDirector()->getWinSize();
+            cocos2d::CCSize winSize = CCDirector::sharedDirector()->getWinSize();
 
-			CCSprite* sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
-			sprite->setScale(0.350f);
-            
-        	CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(
-                sprite,
-			    this,
-			    menu_selector(RecordLayer::openMenu2)
-            );
-			btn->setPosition({160, -99});
+            CCSprite* sprite =
+                CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
+            sprite->setScale(0.350f);
 
-			CCLayer* layer = this->getChildByType<CCLayer>(0);
+            CCMenuItemSpriteExtra* btn = CCMenuItemExt::createSpriteExtra(
+                sprite, [this](CCMenuItemSpriteExtra* sender) {
+                    this->openMenu2(sender);
+                });
+            btn->setPosition({160, -99});
 
-			CCMenu* menu = CCMenu::create();
+            CCLayer* layer = this->getChildByType<CCLayer>(0);
+
+            CCMenu* menu = CCMenu::create();
             menu->setID("button-menu"_spr);
-			layer->addChild(menu);
+            layer->addChild(menu);
 
-        	menu->addChild(btn);
-		}
+            menu->addChild(btn);
+        }
 
         if (g.layer) {
             static_cast<RecordLayer*>(g.layer)->cursorWasHidden = false;
@@ -271,14 +271,13 @@ class $modify(GameLevelOptionsLayer) {
         if (!Mod::get()->getSettingValue<bool>("level_settings_button")) return ret;
 
         CCSprite* sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
-		sprite->setScale(0.350f);
-            
-        CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(
-            sprite,
-		    ret,
-		    menu_selector(RecordLayer::openMenu2)
-        );
-		btn->setPosition({-174, -114});
+        sprite->setScale(0.350f);
+
+        CCMenuItemSpriteExtra* btn = CCMenuItemExt::createSpriteExtra(
+            sprite, [ret](CCMenuItemSpriteExtra* sender) {
+                ret->openMenu2(sender);
+            });
+        btn->setPosition({-174, -114});
 
         if (CCLayer* layer = ret->getChildByType<CCLayer>(0))
             if (CCMenu* menu = layer->getChildByType<CCMenu>(1))

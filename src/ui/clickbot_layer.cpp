@@ -285,7 +285,7 @@ bool ClickbotLayer::init() {
     // CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"); CCSprite*
     // spriteOff = CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
 
-    // CCMenuItemToggler* toggle = CCMenuItemToggler::create(spriteOff,
+    // CCMenuItemToggler* toggle = CCMenuItemExt::createToggler(spriteOn,
     // spriteOn, this, menu_selector(RecordLayer::toggleSetting));
     CCMenuItemToggler *toggle = CCMenuItemExt::createTogglerWithStandardSprites(
         0.55f, [this](CCMenuItemToggler *sender) {});

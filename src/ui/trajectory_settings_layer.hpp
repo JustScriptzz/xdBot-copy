@@ -21,19 +21,16 @@ class TrajectorySettingsLayer : public geode::Popup, public TextInputDelegate {
 
         Utils::setBackgroundColor(m_bgSprite);
 
-        CCSprite *spriteOn =
-            CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
-        CCSprite *spriteOff =
-            CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
-
         CCLabelBMFont *lbl = CCLabelBMFont::create("Both Sides", "bigFont.fnt");
         lbl->setPosition({m_size.width - 68, 77});
         lbl->setScale(0.35f);
         m_mainLayer->addChild(lbl);
 
-        CCMenuItemToggler *toggle = CCMenuItemToggler::create(
-            spriteOff, spriteOn, this,
-            menu_selector(TrajectorySettingsLayer::onToggle));
+        CCMenuItemToggler *toggle =
+            CCMenuItemExt::createTogglerWithStandardSprites(
+                0.5f, [this](CCMenuItemToggler *sender) {
+                    TrajectorySettingsLayer::onToggle(sender);
+                });
         toggle->setPosition({m_size.width - 68, 56});
         toggle->setScale(0.5f);
         toggle->toggle(
@@ -70,9 +67,7 @@ class TrajectorySettingsLayer : public geode::Popup, public TextInputDelegate {
             ShowTrajectory::ccc3BFromccc4F(ShowTrajectory::get().color1));
         color1->setScale(0.5f);
 
-        CCMenuItemSpriteExtra *colorButton = CCMenuItemSpriteExtra::create(
-            color1, this,
-            menu_selector(TrajectorySettingsLayer::openColorPicker));
+        CCMenuItemSpriteExtra *colorButton = CCMenuItemExt::createSpriteExtra(color1, [this](CCMenuItemSpriteExtra *sender) { TrajectorySettingsLayer::openColorPicker(sender); });
         colorButton->setPosition({68, 109});
         colorButton->setTag(1);
         m_buttonMenu->addChild(colorButton);
@@ -82,23 +77,19 @@ class TrajectorySettingsLayer : public geode::Popup, public TextInputDelegate {
             ShowTrajectory::ccc3BFromccc4F(ShowTrajectory::get().color2));
         color2->setScale(0.5f);
 
-        colorButton = CCMenuItemSpriteExtra::create(
-            color2, this,
-            menu_selector(TrajectorySettingsLayer::openColorPicker));
+        colorButton = CCMenuItemExt::createSpriteExtra(color2, [this](CCMenuItemSpriteExtra *sender) { TrajectorySettingsLayer::openColorPicker(sender); });
         colorButton->setPosition({m_size.width - 68, 109});
         m_buttonMenu->addChild(colorButton);
 
         ButtonSprite *btnSpr = ButtonSprite::create("OK");
         btnSpr->setScale(0.73f);
-        CCMenuItemSpriteExtra *btn = CCMenuItemSpriteExtra::create(
-            btnSpr, this, menu_selector(TrajectorySettingsLayer::onClose));
+        CCMenuItemSpriteExtra *btn = CCMenuItemExt::createSpriteExtra(btnSpr, [this](CCMenuItemSpriteExtra *sender) { TrajectorySettingsLayer::onClose(sender); });
         btn->setPosition({m_size.width / 2, 23});
         m_buttonMenu->addChild(btn);
 
         btnSpr = ButtonSprite::create("Restore");
         btnSpr->setScale(0.3f);
-        btn = CCMenuItemSpriteExtra::create(
-            btnSpr, this, menu_selector(TrajectorySettingsLayer::onRestore));
+        btn = CCMenuItemExt::createSpriteExtra(btnSpr, [this](CCMenuItemSpriteExtra *sender) { TrajectorySettingsLayer::onRestore(sender); });
         btn->setPosition({223, 14});
         m_buttonMenu->addChild(btn);
 

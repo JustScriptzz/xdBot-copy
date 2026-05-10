@@ -68,30 +68,21 @@ class AutoSaveLayer : public geode::Popup, public TextInputDelegate {
         intervalInput->getInputNode()->setMaxLabelLength(4);
         m_mainLayer->addChild(intervalInput);
 
-        intervalToggle = CCMenuItemToggler::create(
-            CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"),
-            CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"), this,
-            menu_selector(AutoSaveLayer::onToggle));
+        intervalToggle = CCMenuItemExt::createTogglerWithStandardSprites(0.6f, [this](CCMenuItemToggler *sender) { AutoSaveLayer::onToggle(sender); });
         intervalToggle->setPosition({35, 130});
         intervalToggle->setScale(0.6f);
         intervalToggle->toggle(
             Mod::get()->getSavedValue<bool>("autosave_interval_enabled"));
         m_buttonMenu->addChild(intervalToggle);
 
-        checkpointToggle = CCMenuItemToggler::create(
-            CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"),
-            CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"), this,
-            menu_selector(AutoSaveLayer::onToggle));
+        checkpointToggle = CCMenuItemExt::createTogglerWithStandardSprites(0.6f, [this](CCMenuItemToggler *sender) { AutoSaveLayer::onToggle(sender); });
         checkpointToggle->setPosition({35, 94});
         checkpointToggle->setScale(0.6f);
         checkpointToggle->toggle(
             Mod::get()->getSavedValue<bool>("autosave_checkpoint_enabled"));
         m_buttonMenu->addChild(checkpointToggle);
 
-        levelEndToggle = CCMenuItemToggler::create(
-            CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"),
-            CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"), this,
-            menu_selector(AutoSaveLayer::onToggle));
+        levelEndToggle = CCMenuItemExt::createTogglerWithStandardSprites(0.6f, [this](CCMenuItemToggler *sender) { AutoSaveLayer::onToggle(sender); });
         levelEndToggle->setPosition({35, 57});
         levelEndToggle->setScale(0.6f);
         levelEndToggle->toggle(
@@ -100,8 +91,7 @@ class AutoSaveLayer : public geode::Popup, public TextInputDelegate {
 
         ButtonSprite *btnSpr = ButtonSprite::create("OK");
         btnSpr->setScale(0.7f);
-        CCMenuItemSpriteExtra *btn = CCMenuItemSpriteExtra::create(
-            btnSpr, this, menu_selector(AutoSaveLayer::onClose));
+        CCMenuItemSpriteExtra *btn = CCMenuItemExt::createSpriteExtra(btnSpr, [this](CCMenuItemSpriteExtra *sender) { AutoSaveLayer::onClose(sender); });
         btn->setPosition({m_size.width / 2, 24});
         m_buttonMenu->addChild(btn);
 

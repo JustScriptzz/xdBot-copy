@@ -21,13 +21,6 @@ $execute {
         },
         Mod::get());
 
-    geode::listenForSettingChanges<int64_t>(
-        "frame_fixes_limit",
-        +[](int64_t value) {
-            Global::get().frameFixesLimit = value;
-        },
-        Mod::get());
-
     geode::listenForSettingChanges<bool>(
         "lock_delta",
         +[](bool value) {
@@ -41,31 +34,6 @@ $execute {
             Global::get().stopPlaying = value;
         },
         Mod::get());
-};
-
-class $modify(EclipseSyncGJBGLHook, GJBaseGameLayer) {
-    void update(float dt) {
-        GJBaseGameLayer::update(dt);
-
-        static bool hasEclipse = Loader::get()->getLoadedMod("eclipse.eclipse-menu") != nullptr;
-        if (!hasEclipse)
-            return;
-
-        auto& g = Global::get();
-        if (!g.tpsEnabled)
-            return;
-
-        bool eclipseEnabled = eclipse::config::getInternal("global.tpsbypass.toggle", false);
-        double eclipseTps = eclipse::config::getInternal("global.tpsbypass", 240.0);
-
-        if (!eclipseEnabled) {
-            eclipse::config::setInternal("global.tpsbypass.toggle", true);
-        }
-
-        if (eclipseTps != static_cast<double>(g.tps)) {
-            eclipse::config::setInternal("global.tpsbypass", static_cast<double>(g.tps));
-        }
-    }
 };
 
 class $modify(PlayLayer) {
@@ -277,18 +245,7 @@ class $modify(BGLHook, GJBaseGameLayer) {
         if (!g.frameFixes || g.macro.inputs.empty())
             return;
 
-        if (!g.macro.frameFixes.empty())
-            if (1.f / Global::getTPS() * (frame - g.macro.frameFixes.back().frame) <
-                1.f / g.frameFixesLimit)
-                return;
-
         g.macro.recordFrameFix(frame, m_player1, m_player2);
-    }
-
-    bool isHoldActivatedRingMode(PlayerObject* player) {
-        if (!player)
-            return false;
-        return player->m_isShip || player->m_isBird || player->m_isDart || player->m_isSwing;
     }
 
     void handlePlaying(int frame) {
@@ -342,8 +299,6 @@ class $modify(BGLHook, GJBaseGameLayer) {
                 p1->setRotation(fix.p1.rotation);
             p1->m_yVelocity = fix.p1.yVelocity;
             p1->m_platformerXVelocity = fix.p1.xVelocity;
-            p1->m_isDashing = fix.p1.isDashing;
-            p1->m_isOnGround = fix.p1.isOnGround;
 
             if (m_gameState.m_isDualMode) {
                 p2->setPosition(fix.p2.pos);
@@ -351,8 +306,6 @@ class $modify(BGLHook, GJBaseGameLayer) {
                     p2->setRotation(fix.p2.rotation);
                 p2->m_yVelocity = fix.p2.yVelocity;
                 p2->m_platformerXVelocity = fix.p2.xVelocity;
-                p2->m_isDashing = fix.p2.isDashing;
-                p2->m_isOnGround = fix.p2.isOnGround;
             }
 
             g.currentFrameFix++;

@@ -161,19 +161,13 @@ class AutoclickerLayer : public geode::Popup, public TextInputDelegate {
         releaseInput2->getInputNode()->setMaxLabelLength(4);
         m_mainLayer->addChild(releaseInput2);
 
-        toggleP1 = CCMenuItemToggler::create(
-            CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"),
-            CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"), this,
-            menu_selector(AutoclickerLayer::onToggle));
+        toggleP1 = CCMenuItemExt::createTogglerWithStandardSprites(0.5f, [this](CCMenuItemToggler *sender) { AutoclickerLayer::onToggle(sender); });
         toggleP1->setPosition({162, 195});
         toggleP1->setScale(0.5f);
         toggleP1->toggle(Global::get().autoclickerP1);
         m_buttonMenu->addChild(toggleP1);
 
-        toggleP2 = CCMenuItemToggler::create(
-            CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"),
-            CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"), this,
-            menu_selector(AutoclickerLayer::onToggle));
+        toggleP2 = CCMenuItemExt::createTogglerWithStandardSprites(0.5f, [this](CCMenuItemToggler *sender) { AutoclickerLayer::onToggle(sender); });
         toggleP2->setPosition({162, 115});
         toggleP2->setScale(0.5f);
         toggleP2->toggle(Global::get().autoclickerP2);
@@ -181,8 +175,7 @@ class AutoclickerLayer : public geode::Popup, public TextInputDelegate {
 
         ButtonSprite *btnSpr = ButtonSprite::create("OK");
         btnSpr->setScale(0.7f);
-        CCMenuItemSpriteExtra *btn = CCMenuItemSpriteExtra::create(
-            btnSpr, this, menu_selector(AutoclickerLayer::onClose));
+        CCMenuItemSpriteExtra *btn = CCMenuItemExt::createSpriteExtra(btnSpr, [this](CCMenuItemSpriteExtra *sender) { AutoclickerLayer::onClose(sender); });
         btn->setPosition({m_size.width / 2, 24});
         m_buttonMenu->addChild(btn);
 

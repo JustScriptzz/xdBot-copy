@@ -179,8 +179,7 @@ bool MacroEditLayer::init() {
 
     CCSprite *spr = CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
     spr->setScale(0.55f);
-    pageLeftBtn = CCMenuItemSpriteExtra::create(
-        spr, this, menu_selector(MacroEditLayer::switchPage));
+    pageLeftBtn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { MacroEditLayer::switchPage(sender); });
     pageLeftBtn->setID("left");
     pageLeftBtn->setPositionX(-199);
     menu->addChild(pageLeftBtn);
@@ -188,43 +187,37 @@ bool MacroEditLayer::init() {
     spr = CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
     spr->setFlipX(true);
     spr->setScale(0.55f);
-    pageRightBtn = CCMenuItemSpriteExtra::create(
-        spr, this, menu_selector(MacroEditLayer::switchPage));
+    pageRightBtn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { MacroEditLayer::switchPage(sender); });
     pageRightBtn->setPositionX(17);
     menu->addChild(pageRightBtn);
 
     ButtonSprite *btnSpr = ButtonSprite::create("Apply");
     btnSpr->setScale(0.5f);
-    saveBtn = CCMenuItemSpriteExtra::create(
-        btnSpr, this, menu_selector(MacroEditLayer::onSave));
+    saveBtn = CCMenuItemExt::createSpriteExtra(btnSpr, [this](CCMenuItemSpriteExtra *sender) { MacroEditLayer::onSave(sender); });
     saveBtn->setPosition({185, -99});
     menu->addChild(saveBtn);
 
     btnSpr = ButtonSprite::create("Merge");
     btnSpr->setScale(0.5f);
-    CCMenuItemSpriteExtra *btn = CCMenuItemSpriteExtra::create(
-        btnSpr, this, menu_selector(MacroEditLayer::onMerge));
+    CCMenuItemSpriteExtra *btn = CCMenuItemExt::createSpriteExtra(btnSpr, [this](CCMenuItemSpriteExtra *sender) { MacroEditLayer::onMerge(sender); });
     btn->setPosition({72, -99});
     menu->addChild(btn);
 
     btnSpr = ButtonSprite::create("Clear");
     btnSpr->setScale(0.5f);
-    btn = CCMenuItemSpriteExtra::create(btnSpr, this,
-                                        menu_selector(MacroEditLayer::onClear));
+    btn = CCMenuItemExt::createSpriteExtra(btnSpr, [this](CCMenuItemSpriteExtra *sender) { MacroEditLayer::onClear(sender); });
     btn->setPosition({128.5, -99});
     menu->addChild(btn);
 
     spr = CCSprite::createWithSpriteFrameName("GJ_plusBtn_001.png");
     spr->setScale(0.45f);
-    btn = CCMenuItemSpriteExtra::create(
-        spr, this, menu_selector(MacroEditLayer::onAddInput));
+    btn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { MacroEditLayer::onAddInput(sender); });
     btn->setPosition({23.5, -94});
     menu->addChild(btn);
 
     spr = CCSprite::createWithSpriteFrameName("GJ_deleteSongBtn_001.png");
     spr->setScale(0.55f);
-    deleteBtn = CCMenuItemSpriteExtra::create(
-        spr, this, menu_selector(MacroEditLayer::onRemoveInput));
+    deleteBtn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { MacroEditLayer::onRemoveInput(sender); });
     deleteBtn->setPosition({23.5, -64});
     menu->addChild(deleteBtn);
 
@@ -266,16 +259,14 @@ bool MacroEditLayer::init() {
 
     spr = CCSprite::createWithSpriteFrameName("edit_leftBtn_001.png");
     spr->setScale(0.55f);
-    btn = CCMenuItemSpriteExtra::create(
-        spr, this, menu_selector(MacroEditLayer::switchFrame));
+    btn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { MacroEditLayer::switchFrame(sender); });
     btn->setPosition({xPos + 62, yPos});
     btn->setID("left");
     selectedInputMenu->addChild(btn);
 
     spr = CCSprite::createWithSpriteFrameName("edit_rightBtn_001.png");
     spr->setScale(0.55f);
-    btn = CCMenuItemSpriteExtra::create(
-        spr, this, menu_selector(MacroEditLayer::switchFrame));
+    btn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { MacroEditLayer::switchFrame(sender); });
     btn->setPosition({xPos + 120, yPos});
     selectedInputMenu->addChild(btn);
 
@@ -287,16 +278,14 @@ bool MacroEditLayer::init() {
 
     spr = CCSprite::createWithSpriteFrameName("edit_leftBtn_001.png");
     spr->setScale(0.55f);
-    btn = CCMenuItemSpriteExtra::create(
-        spr, this, menu_selector(MacroEditLayer::switchButton));
+    btn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { MacroEditLayer::switchButton(sender); });
     btn->setPosition({xPos + 62, yPos - 35});
     btn->setID("left");
     selectedInputMenu->addChild(btn);
 
     spr = CCSprite::createWithSpriteFrameName("edit_rightBtn_001.png");
     spr->setScale(0.55f);
-    btn = CCMenuItemSpriteExtra::create(
-        spr, this, menu_selector(MacroEditLayer::switchButton));
+    btn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { MacroEditLayer::switchButton(sender); });
     btn->setPosition({xPos + 120, yPos - 35});
     selectedInputMenu->addChild(btn);
 
@@ -322,15 +311,13 @@ bool MacroEditLayer::init() {
 
     spr = CCSprite::createWithSpriteFrameName("edit_leftBtn_001.png");
     spr->setScale(0.55f);
-    btn = CCMenuItemSpriteExtra::create(
-        spr, this, menu_selector(MacroEditLayer::switchAction));
+    btn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { MacroEditLayer::switchAction(sender); });
     btn->setPosition({xPos + 62, yPos - 66});
     selectedInputMenu->addChild(btn);
 
     spr = CCSprite::createWithSpriteFrameName("edit_rightBtn_001.png");
     spr->setScale(0.55f);
-    btn = CCMenuItemSpriteExtra::create(
-        spr, this, menu_selector(MacroEditLayer::switchAction));
+    btn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { MacroEditLayer::switchAction(sender); });
     btn->setPosition({xPos + 120, yPos - 66});
     selectedInputMenu->addChild(btn);
 
@@ -356,15 +343,13 @@ bool MacroEditLayer::init() {
 
     spr = CCSprite::createWithSpriteFrameName("edit_leftBtn_001.png");
     spr->setScale(0.55f);
-    btn = CCMenuItemSpriteExtra::create(
-        spr, this, menu_selector(MacroEditLayer::switchPlayer));
+    btn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { MacroEditLayer::switchPlayer(sender); });
     btn->setPosition({xPos + 62, yPos - 97});
     selectedInputMenu->addChild(btn);
 
     spr = CCSprite::createWithSpriteFrameName("edit_rightBtn_001.png");
     spr->setScale(0.55f);
-    btn = CCMenuItemSpriteExtra::create(
-        spr, this, menu_selector(MacroEditLayer::switchPlayer));
+    btn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { MacroEditLayer::switchPlayer(sender); });
     btn->setPosition({xPos + 120, yPos - 97});
     selectedInputMenu->addChild(btn);
 

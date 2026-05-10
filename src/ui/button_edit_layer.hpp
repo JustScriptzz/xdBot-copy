@@ -30,8 +30,8 @@ class ButtonEditLayer : public geode::Popup {
     Mod *mod = nullptr;
     CCMenu *menu = nullptr;
 
-    Slider *scaleSlider = nullptr;
-    Slider *opacitySlider = nullptr;
+    SliderNode *scaleSlider = nullptr;
+    SliderNode *opacitySlider = nullptr;
 
     CCLabelBMFont *scaleLbl = nullptr;
     CCLabelBMFont *opacityLbl = nullptr;

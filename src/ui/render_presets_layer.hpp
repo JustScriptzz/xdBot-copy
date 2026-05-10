@@ -40,8 +40,7 @@ class RenderPresetsLayer : public geode::Popup {
 
             ButtonSprite *spr = ButtonSprite::create("Load");
             spr->setScale(0.6f);
-            CCMenuItemSpriteExtra *btn = CCMenuItemSpriteExtra::create(
-                spr, this, menu_selector(RenderPresetsLayer::onLoad));
+            CCMenuItemSpriteExtra *btn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { RenderPresetsLayer::onLoad(sender); });
             btn->setPosition({123, height});
             btn->setID(id.c_str());
             m_buttonMenu->addChild(btn);
@@ -67,8 +66,7 @@ class RenderPresetsLayer : public geode::Popup {
 
             spr = ButtonSprite::create("Save");
             spr->setScale(0.6f);
-            btn = CCMenuItemSpriteExtra::create(
-                spr, this, menu_selector(RenderPresetsLayer::onSave));
+            btn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { RenderPresetsLayer::onSave(sender); });
             btn->setPosition({183, height});
             btn->setID(id.c_str());
             m_buttonMenu->addChild(btn);
@@ -76,8 +74,7 @@ class RenderPresetsLayer : public geode::Popup {
 
         ButtonSprite *btnSpr = ButtonSprite::create("OK");
         btnSpr->setScale(0.75f);
-        CCMenuItemSpriteExtra *btn = CCMenuItemSpriteExtra::create(
-            btnSpr, this, menu_selector(RenderPresetsLayer::onClose));
+        CCMenuItemSpriteExtra *btn = CCMenuItemExt::createSpriteExtra(btnSpr, [this](CCMenuItemSpriteExtra *sender) { RenderPresetsLayer::onClose(sender); });
         btn->setPosition({m_size.width / 2, 22});
         m_buttonMenu->addChild(btn);
 
@@ -91,8 +88,7 @@ class RenderPresetsLayer : public geode::Popup {
         spr2->setScale(0.7f);
 
         spr->addChild(spr2);
-        btn = CCMenuItemSpriteExtra::create(
-            spr, this, menu_selector(RenderPresetsLayer::openRendersFolder));
+        btn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { RenderPresetsLayer::openRendersFolder(sender); });
         btn->setPosition({18, 18});
         m_buttonMenu->addChild(btn);
 

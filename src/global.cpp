@@ -2,19 +2,8 @@
 #include "ui/game_ui.hpp"
 #include "ui/record_layer.hpp"
 
-#include <Geode/modify/CCTextInputNode.hpp>
 #include <Geode/modify/GJBaseGameLayer.hpp>
 #include <random>
-
-class $modify(CCTextInputNode) {
-
-    bool ccTouchBegan(cocos2d::CCTouch* v1, cocos2d::CCEvent* v2) {
-        if (this->getID() == "disabled-input"_spr)
-            return false;
-
-        return CCTextInputNode::ccTouchBegan(v1, v2);
-    }
-};
 
 struct IncompatibleSetting {
     std::string ID;
@@ -235,11 +224,7 @@ int Global::getCurrentFrame(bool editor) {
     if (!pl)
         return 0;
 
-    if (g.macro.isLegacy) {
-        return pl->m_gameState.m_currentProgress / 2 - g.frameOffset;
-    }
-
-    return pl->m_gameState.m_currentProgress - g.frameOffset;
+    return g.m_frameCount - g.frameOffset;
 }
 
 class $modify(FrameCounterGJBaseGameLayer, GJBaseGameLayer) {
@@ -251,14 +236,14 @@ class $modify(FrameCounterGJBaseGameLayer, GJBaseGameLayer) {
                          !playLayer->m_player1->m_isDead &&
                          (!playLayer->m_gameState.m_isDualMode || !playLayer->m_player2->m_isDead);
 
-        if (g.state == state::playing && !g.tpsEnabled) {
+        if (g.state == state::playing && !g.tpsEnabled && g.macro.framerate != 240.f) {
             g.setTpsEnabled(true);
         }
 
         GJBaseGameLayer::processCommands(dt, isHalfTick, isLastTick);
 
         if (isPlaying) {
-            g.m_frameCount++;
+            g.m_frameCount = m_gameState.m_currentProgress / 2;
         }
     }
 };
@@ -505,7 +490,6 @@ $execute {
     g.mod->setSavedValue("macro_speedhack_enabled", false);
 
     g.frameOffset = g.mod->getSettingValue<int64_t>("frame_offset");
-    g.frameFixesLimit = g.mod->getSettingValue<int64_t>("frame_fixes_limit");
     g.lockDelta = g.mod->getSettingValue<bool>("lock_delta");
     g.stopPlaying = g.mod->getSettingValue<bool>("auto_stop_playing");
 

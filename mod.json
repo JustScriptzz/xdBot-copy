@@ -209,13 +209,6 @@
 			"type": "bool",
 			"default": true
 		},
-		"frame_fixes_limit": {
-			"name": "Frame Fixes Limit in FPS",
-			"description": "Limits how many frame fixes per second there will be.",
-			"type": "int",
-			"default": 240,
-			"min": 1
-		},
 		"auto_stop_playing": {
 			"name": "Auto Stop Playing",
 			"description": "Stops playing the macro when it ends.",

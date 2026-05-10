@@ -95,25 +95,38 @@ class Global {
     std::vector<geode::Function<void(double)>> onTpsChanged;
 
     void setTpsEnabled(bool enabled) {
+        if (tpsEnabled == enabled)
+            return;
+
+        if (state == none)
+            previousTpsEnabled = tpsEnabled;
         tpsEnabled = enabled;
+
         mod->setSavedValue("macro_tps_enabled", enabled);
+
+        for (auto& cb : onTpsEnabledChanged)
+            cb(enabled);
 
         if (Loader::get()->getLoadedMod("eclipse.eclipse-menu")) {
             eclipse::config::setInternal("global.tpsbypass.toggle", enabled);
-        } else {
-            for (auto& cb : onTpsEnabledChanged)
-                cb(enabled);
         }
     }
 
     void setTps(float newTps) {
+        if (tps == newTps)
+            return;
+
+        if (state == none)
+            previousTps = tps;
         tps = newTps;
+
         mod->setSavedValue("macro_tps", static_cast<double>(newTps));
+
+        for (auto& cb : onTpsChanged)
+            cb(static_cast<double>(newTps));
+
         if (Loader::get()->getLoadedMod("eclipse.eclipse-menu")) {
             eclipse::config::setInternal("global.tpsbypass", static_cast<double>(newTps));
-        } else {
-            for (auto& cb : onTpsChanged)
-                cb(static_cast<double>(newTps));
         }
     }
 
@@ -140,7 +153,6 @@ class Global {
 
     size_t currentAction = 0;
     size_t currentFrameFix = 0;
-    int frameFixesLimit = 240;
     bool frameFixes = false;
     bool inputFixes = false;
 

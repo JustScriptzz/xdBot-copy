@@ -278,8 +278,7 @@ bool LoadMacroLayer::init(geode::Popup *layer, geode::Popup *layer2,
         CCSprite *icon =
             CCSprite::createWithSpriteFrameName("GJ_plusBtn_001.png");
         icon->setScale(0.585f);
-        CCMenuItemSpriteExtra *btn = CCMenuItemSpriteExtra::create(
-            icon, this, menu_selector(LoadMacroLayer::onImportMacro));
+        CCMenuItemSpriteExtra *btn = CCMenuItemExt::createSpriteExtra(icon, [this](CCMenuItemSpriteExtra *sender) { LoadMacroLayer::onImportMacro(sender); });
         btn->setPosition(ccp(165, -121));
 
         menu->addChild(btn);
@@ -361,20 +360,20 @@ bool LoadMacroLayer::init(geode::Popup *layer, geode::Popup *layer2,
     spr4->setPosition({20, 20});
     spr3->addChild(spr4);
 
-    sortToggle = CCMenuItemToggler::create(
-        spr1, spr3, this, menu_selector(LoadMacroLayer::updateSort));
+    sortToggle = CCMenuItemExt::createToggler(
+        spr3, spr1,
+        [this](CCMenuItemToggler *sender) {
+            LoadMacroLayer::updateSort(sender);
+        });
     sortToggle->setPosition({-145, 100});
     sortToggle->setScale(0.55f);
     sortToggle->toggle(false);
     menu->addChild(sortToggle);
 
-    CCSprite *spriteOn =
-        CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
-    CCSprite *spriteOff =
-        CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
-
-    selectAllToggle = CCMenuItemToggler::create(
-        spriteOff, spriteOn, this, menu_selector(LoadMacroLayer::onSelectAll));
+    selectAllToggle = CCMenuItemExt::createTogglerWithStandardSprites(
+        0.585f, [this](CCMenuItemToggler *sender) {
+            LoadMacroLayer::onSelectAll(sender);
+        });
     selectAllToggle->setScale(0.585f);
     selectAllToggle->setPosition({-165, -121});
 
@@ -391,8 +390,7 @@ bool LoadMacroLayer::init(geode::Popup *layer, geode::Popup *layer2,
     CCSprite *spr =
         CCSprite::createWithSpriteFrameName("gj_findBtnOff_001.png");
     spr->setScale(0.685f);
-    searchOff = CCMenuItemSpriteExtra::create(
-        spr, this, menu_selector(LoadMacroLayer::clearSearch));
+    searchOff = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { LoadMacroLayer::clearSearch(sender); });
     searchOff->setPosition(ccp(137, 100));
     searchOff->setVisible(false);
     menu->addChild(searchOff);
@@ -405,22 +403,22 @@ bool LoadMacroLayer::init(geode::Popup *layer, geode::Popup *layer2,
     menu->addChild(macroCountLbl);
 
     if (isMerge) {
-        p1Toggle =
-            CCMenuItemToggler::create(spriteOff, spriteOn, this, nullptr);
+        p1Toggle = CCMenuItemExt::createTogglerWithStandardSprites(
+            0.675f, [](CCMenuItemToggler *) {});
         p1Toggle->setID("p1-toggle");
         p1Toggle->setScale(0.675f);
         p1Toggle->setPosition({-23, -121});
         menu->addChild(p1Toggle);
 
-        p2Toggle =
-            CCMenuItemToggler::create(spriteOff, spriteOn, this, nullptr);
+        p2Toggle = CCMenuItemExt::createTogglerWithStandardSprites(
+            0.675f, [](CCMenuItemToggler *) {});
         p2Toggle->setID("p2-toggle");
         p2Toggle->setScale(0.675f);
         p2Toggle->setPosition({98, -121});
         menu->addChild(p2Toggle);
 
-        owToggle =
-            CCMenuItemToggler::create(spriteOff, spriteOn, this, nullptr);
+        owToggle = CCMenuItemExt::createTogglerWithStandardSprites(
+            0.675f, [](CCMenuItemToggler *) {});
         owToggle->setID("ow-toggle");
         owToggle->setScale(0.675f);
         owToggle->setPosition({-166, -121});
@@ -522,16 +520,6 @@ void LoadMacroLayer::addList(bool refresh, float prevScroll) {
         fmt::format("{} Macros", geode::utils::numToString(cells->count()))
             .c_str());
 
-    if (cells->count() == 0) {
-        CCLabelBMFont *lbl = CCLabelBMFont::create(
-            isAutosaves ? "No Autosaves" : "No Macros", "bigFont.fnt");
-        lbl->setPosition(winSize / 2);
-        lbl->setScale(0.5f);
-        lbl->setOpacity(100);
-        lbl->setID("no-macros-label");
-        menu->addChild(lbl);
-    }
-
     ListView *listView = ListView::create(cells, 35, 323, 180);
     CCNode *contentLayer = static_cast<CCNode *>(
         listView->m_tableView->getChildren()->objectAtIndex(0));
@@ -574,6 +562,19 @@ void LoadMacroLayer::addList(bool refresh, float prevScroll) {
     listLayer->setID("list-layer");
     listView->setPositionY(-12);
     m_buttonMenu->addChild(listLayer);
+
+    if (cells->count() == 0) {
+        CCLabelBMFont *lbl = CCLabelBMFont::create(
+            isAutosaves ? "No Autosaves" : "No Macros", "bigFont.fnt");
+        lbl->setScale(0.5f);
+        lbl->setOpacity(100);
+        lbl->setAnchorPoint({0.5f, 0.5f});
+        lbl->setPosition(listLayer->getPosition() +
+                         ccp(listLayer->getContentSize().width / 2.f,
+                             listLayer->getContentSize().height / 2.f));
+        lbl->setID("no-macros-label");
+        m_buttonMenu->addChild(lbl);
+    }
 
     listLayer->setUserObject("dont-correct-borders",
                              cocos2d::CCBool::create(true));
@@ -724,27 +725,20 @@ bool MacroCell::init(std::filesystem::path path, std::string name,
 
     ButtonSprite *spr = ButtonSprite::create(btnText.c_str());
     spr->setScale(isMerge ? 0.5425f : 0.62f);
-    CCMenuItemSpriteExtra *btn = CCMenuItemSpriteExtra::create(
-        spr, this, menu_selector(MacroCell::onLoad));
+    CCMenuItemSpriteExtra *btn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { MacroCell::onLoad(sender); });
     btn->setPosition(ccp(isMerge ? 277.26f : 288.26f, 17.5f));
     menu->addChild(btn);
 
     CCSprite *spr2 = CCSprite::createWithSpriteFrameName("GJ_trashBtn_001.png");
     spr2->setScale(0.485f);
-    btn = CCMenuItemSpriteExtra::create(spr2, this,
-                                        menu_selector(MacroCell::onDelete));
+    btn = CCMenuItemExt::createSpriteExtra(spr2, [this](CCMenuItemSpriteExtra *sender) { MacroCell::onDelete(sender); });
     btn->setPosition(ccp(246, 17.5f));
 
     if (!isMerge)
         menu->addChild(btn);
 
-    CCSprite *spriteOn =
-        CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
-    CCSprite *spriteOff =
-        CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
-
-    toggler = CCMenuItemToggler::create(spriteOff, spriteOn, this,
-                                        menu_selector(MacroCell::onSelect));
+    toggler = CCMenuItemExt::createTogglerWithStandardSprites(
+        0.485f, [this](CCMenuItemToggler *sender) { this->onSelect(sender); });
     toggler->setScale(0.485f);
     toggler->setPosition({220, 17.5});
 

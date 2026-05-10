@@ -169,7 +169,8 @@ bool ButtonEditLayer::init() {
 
     spr = ButtonSprite::create("Cancel");
     spr->setScale(0.6f);
-    btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(ButtonEditLayer::onClose));
+    btn = CCMenuItemExt::createSpriteExtra(
+        spr, [this](CCMenuItemSpriteExtra* sender) { onClose(sender); });
     btn->setPosition({-40, 30});
     menu->addChild(btn);
 
@@ -250,12 +251,7 @@ bool ButtonEditLayer::init() {
 }
 
 void ButtonEditLayer::updateScale(CCObject*) {
-    float value = scaleSlider->getThumb()->getValue();
-
-    if (value < 0.12f) {
-        value = 0.12f;
-        scaleSlider->getThumb()->setValue(value);
-    }
+    float value = scaleSlider->getValue();
 
     spriteButtons[currentSelected]->setScale(value);
 
@@ -265,12 +261,7 @@ void ButtonEditLayer::updateScale(CCObject*) {
 }
 
 void ButtonEditLayer::updateOpacity(CCObject*) {
-    float value = opacitySlider->getThumb()->getValue();
-
-    if (value < 0.05f) {
-        value = 0.05f;
-        opacitySlider->getThumb()->setValue(value);
-    }
+    float value = opacitySlider->getValue();
 
     spriteButtons[currentSelected]->setOpacity(static_cast<int>(value * 255));
 
@@ -280,16 +271,20 @@ void ButtonEditLayer::updateOpacity(CCObject*) {
 }
 
 void ButtonEditLayer::addSliders() {
-    opacitySlider = Slider::create(this, menu_selector(ButtonEditLayer::updateOpacity), 0.8f);
+    opacitySlider = SliderNode::create([this](SliderNode*, float) { updateOpacity(nullptr); });
+    opacitySlider->setMin(0.05f);
+    opacitySlider->setMax(1.f);
     opacitySlider->setPosition({31, 66});
-    opacitySlider->setAnchorPoint({0.f, 0.f});
+    opacitySlider->setAnchorPoint({0.5f, 0.5f});
     opacitySlider->setScale(0.5f);
     opacitySlider->setValue(opacities[indexToID[currentSelected]]);
     menu->addChild(opacitySlider);
 
-    scaleSlider = Slider::create(this, menu_selector(ButtonEditLayer::updateScale), 0.8f);
+    scaleSlider = SliderNode::create([this](SliderNode*, float) { updateScale(nullptr); });
+    scaleSlider->setMin(0.12f);
+    scaleSlider->setMax(1.f);
     scaleSlider->setPosition({31, 89});
-    scaleSlider->setAnchorPoint({0.f, 0.f});
+    scaleSlider->setAnchorPoint({0.5f, 0.5f});
     scaleSlider->setScale(0.5f);
     scaleSlider->setValue(scales[indexToID[currentSelected]]);
     menu->addChild(scaleSlider);

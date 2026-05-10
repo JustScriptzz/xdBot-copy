@@ -30,9 +30,7 @@ class NoclipSettingsLayer : public geode::Popup {
         lbl->setScale(0.5f);
         menu->addChild(lbl);
 
-        CCMenuItemToggler *toggle = CCMenuItemToggler::create(
-            spriteOff, spriteOn, this,
-            menu_selector(NoclipSettingsLayer::onToggle));
+        CCMenuItemToggler *toggle = CCMenuItemExt::createTogglerWithStandardSprites(0.875f, [this](CCMenuItemToggler *sender) { NoclipSettingsLayer::onToggle(sender); });
         toggle->setPosition({-47, 21});
         toggle->setScale(0.875f);
         toggle->setID("p1");
@@ -44,9 +42,7 @@ class NoclipSettingsLayer : public geode::Popup {
         lbl->setScale(0.5f);
         menu->addChild(lbl);
 
-        toggle = CCMenuItemToggler::create(
-            spriteOff, spriteOn, this,
-            menu_selector(NoclipSettingsLayer::onToggle));
+        toggle = CCMenuItemExt::createTogglerWithStandardSprites(0.875f, [this](CCMenuItemToggler *sender) { NoclipSettingsLayer::onToggle(sender); });
         toggle->setPosition({-47, -35});
         toggle->setScale(0.875f);
         toggle->setID("p2");

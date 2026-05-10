@@ -46,6 +46,7 @@ struct SupplementalPlayerState {
     int m_lastCollisionTop = 0;
     int m_lastCollisionLeft = 0;
     int m_lastCollisionRight = 0;
+    bool m_jumpBuffered = false;
     int m_unk50C = 0;
     int m_unk510 = 0;
     GameObject* m_currentSlope2 = nullptr;
@@ -187,6 +188,7 @@ struct SupplementalPlayerState {
     bool m_isUpsideDown = false;
     bool m_isSideways = false;
     bool m_isHidden = false;
+    gd::map<int, bool> m_holdingButtons;
     double m_lastFlipTime = 0.0;
     bool m_hasGlow = false;
     int m_dashFireFrame = 0;
@@ -217,6 +219,7 @@ struct SupplementalPlayerState {
         m_lastGroundedPos               = p->m_lastGroundedPos;
         m_isDashing                     = p->m_isDashing;
         m_dashRing                      = p->m_dashRing;
+        m_jumpBuffered                  = p->m_jumpBuffered;
         m_lastLandTime                  = p->m_lastLandTime;
         m_isAccelerating                = p->m_isAccelerating;
         m_affectedByForces              = p->m_affectedByForces;
@@ -385,6 +388,7 @@ struct SupplementalPlayerState {
         m_isUpsideDown                  = p->m_isUpsideDown;
         m_isSideways                    = p->m_isSideways;
         m_isHidden                      = p->m_isHidden;
+        m_holdingButtons                = p->m_holdingButtons;
         m_lastFlipTime                  = p->m_lastFlipTime;
         m_hasGlow                       = p->m_hasGlow;
         m_dashFireFrame                 = p->m_dashFireFrame;
@@ -416,6 +420,8 @@ struct SupplementalPlayerState {
         p->m_lastLandTime                   = m_lastLandTime;
         p->m_isAccelerating                 = m_isAccelerating;
         p->m_affectedByForces               = m_affectedByForces;
+        if (p->m_isBall || p->m_isSpider)
+            p->m_jumpBuffered                   = m_jumpBuffered;
         p->m_rotationSpeed                  = m_rotationSpeed;
         p->m_isBallRotating                 = m_isBallRotating;
         p->m_isBallRotating2                = m_isBallRotating2;
@@ -582,6 +588,7 @@ struct SupplementalPlayerState {
         p->m_isUpsideDown                   = m_isUpsideDown;
         p->m_isSideways                     = m_isSideways;
         p->m_isHidden                       = m_isHidden;
+        p->m_holdingButtons                 = m_holdingButtons;
         p->m_lastFlipTime                   = m_lastFlipTime;
         p->m_hasGlow                       = m_hasGlow;
         p->m_dashFireFrame                  = m_dashFireFrame;

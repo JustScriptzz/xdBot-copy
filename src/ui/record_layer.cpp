@@ -13,6 +13,7 @@
 #include "trajectory_settings_layer.hpp"
 
 #include <Geode/modify/PauseLayer.hpp>
+#include <Geode/ui/GeodeUI.hpp>
 #include <Geode/utils/web.hpp>
 
 const std::vector<std::vector<RecordSetting>> settings{
@@ -83,8 +84,7 @@ class $modify(PauseLayer) {
         sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
         sprite->setScale(0.35f);
 
-        CCMenuItemSpriteExtra *btn = CCMenuItemSpriteExtra::create(
-            sprite, this, menu_selector(RecordLayer::openMenu2));
+        CCMenuItemSpriteExtra *btn = CCMenuItemExt::createSpriteExtra(sprite, [this](CCMenuItemSpriteExtra *sender) { RecordLayer::openMenu2(sender); });
 
         if (!Loader::get()->isModLoaded("geode.node-ids")) {
             CCMenu *menu = CCMenu::create();
@@ -528,16 +528,11 @@ void RecordLayer::showKeybindsWarning() {
 }
 
 void RecordLayer::openKeybinds(CCObject *) {
-    // #ifdef GEODE_IS_DESKTOP
-
-    // geode::openSettingsPopup(Mod::get(), false);
-    // RecordLayer::showKeybindsWarning();
-
-    // #else
-
+    #ifdef GEODE_IS_DESKTOP
+    geode::openKeybindsPopup(std::nullopt, Mod::get());
+    #else
     Interface::openButtonEditor();
-
-    // #endif
+    #endif
 }
 
 void RecordLayer::openPresets(CCObject *) {
@@ -645,11 +640,6 @@ bool RecordLayer::init() {
     warningSprite->setVisible(g.frameOffset != 0);
     warningLabel->setVisible(g.frameOffset != 0);
 
-    CCSprite *spriteOn =
-        CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
-    CCSprite *spriteOff =
-        CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
-
     CCLabelBMFont *versionLabel = CCLabelBMFont::create(
         ("xdBot " + getModVersionString()).c_str(), "chatFont.fnt");
     versionLabel->setOpacity(63);
@@ -665,8 +655,7 @@ bool RecordLayer::init() {
     codecBtnLbl->setOpacity(148);
     codecBtnLbl->setScale(0.65f);
 
-    CCMenuItemSpriteExtra *codecBtn = CCMenuItemSpriteExtra::create(
-        codecBtnLbl, this, menu_selector(RecordLayer::showCodecPopup));
+    CCMenuItemSpriteExtra *codecBtn = CCMenuItemExt::createSpriteExtra(codecBtnLbl, [this](CCMenuItemSpriteExtra *sender) { RecordLayer::showCodecPopup(sender); });
     codecBtn->setPosition({-26, -49});
 
     menu->addChild(codecBtn);
@@ -699,12 +688,10 @@ bool RecordLayer::init() {
     bg->setContentSize({313, 339});
     menu->addChild(bg);
 
-    recording = CCMenuItemToggler::create(
-        spriteOff, spriteOn, this, menu_selector(RecordLayer::toggleRecording));
+    recording = CCMenuItemExt::createTogglerWithStandardSprites(0.555f, [this](CCMenuItemToggler *sender) { RecordLayer::toggleRecording(sender); });
     recording->toggle(g.state == state::recording);
 
-    playing = CCMenuItemToggler::create(
-        spriteOff, spriteOn, this, menu_selector(RecordLayer::togglePlaying));
+    playing = CCMenuItemExt::createTogglerWithStandardSprites(0.555f, [this](CCMenuItemToggler *sender) { RecordLayer::togglePlaying(sender); });
     playing->toggle(g.state == state::playing);
 
     recording->setPosition(ccp(-161.5, 78));
@@ -769,8 +756,7 @@ bool RecordLayer::init() {
     ButtonSprite *btnSprite = ButtonSprite::create("Save");
     btnSprite->setScale(0.54f);
 
-    CCMenuItemSpriteExtra *btn = CCMenuItemSpriteExtra::create(
-        btnSprite, this, menu_selector(RecordLayer::openSaveMacro));
+    CCMenuItemSpriteExtra *btn = CCMenuItemExt::createSpriteExtra(btnSprite, [this](CCMenuItemSpriteExtra *sender) { RecordLayer::openSaveMacro(sender); });
 
     btn->setPosition(ccp(-176, 34));
     menu->addChild(btn);
@@ -782,8 +768,7 @@ bool RecordLayer::init() {
 #endif
     btnSprite->setScale(0.54f);
 
-    btn = CCMenuItemSpriteExtra::create(
-        btnSprite, this, menu_selector(RecordLayer::openKeybinds));
+    btn = CCMenuItemExt::createSpriteExtra(btnSprite, [this](CCMenuItemSpriteExtra *sender) { RecordLayer::openKeybinds(sender); });
 
     btn->setPosition(ccp(40, -100));
     menu->addChild(btn);
@@ -791,8 +776,7 @@ bool RecordLayer::init() {
     btnSprite = ButtonSprite::create("More Settings");
     btnSprite->setScale(0.54f);
 
-    btn = CCMenuItemSpriteExtra::create(
-        btnSprite, this, menu_selector(RecordLayer::moreSettings));
+    btn = CCMenuItemExt::createSpriteExtra(btnSprite, [this](CCMenuItemSpriteExtra *sender) { RecordLayer::moreSettings(sender); });
 
     btn->setPosition(ccp(148, -100));
     menu->addChild(btn);
@@ -800,8 +784,7 @@ bool RecordLayer::init() {
     btnSprite = ButtonSprite::create("Load");
     btnSprite->setScale(0.54f);
 
-    btn = CCMenuItemSpriteExtra::create(
-        btnSprite, this, menu_selector(RecordLayer::openLoadMacro));
+    btn = CCMenuItemExt::createSpriteExtra(btnSprite, [this](CCMenuItemSpriteExtra *sender) { RecordLayer::openLoadMacro(sender); });
 
     btn->setPosition(ccp(-115, 34));
     menu->addChild(btn);
@@ -809,8 +792,7 @@ bool RecordLayer::init() {
     btnSprite = ButtonSprite::create("Edit");
     btnSprite->setScale(0.54f);
 
-    btn = CCMenuItemSpriteExtra::create(
-        btnSprite, this, menu_selector(RecordLayer::onEditMacro));
+    btn = CCMenuItemExt::createSpriteExtra(btnSprite, [this](CCMenuItemSpriteExtra *sender) { RecordLayer::onEditMacro(sender); });
 
     btn->setPosition(ccp(-56, 34));
     menu->addChild(btn);
@@ -872,8 +854,7 @@ bool RecordLayer::init() {
     folderIcon->setScale(0.7f);
 
     emptyBtn->addChild(folderIcon);
-    btn = CCMenuItemSpriteExtra::create(
-        emptyBtn, this, menu_selector(RecordLayer::openPresets));
+    btn = CCMenuItemExt::createSpriteExtra(emptyBtn, [this](CCMenuItemSpriteExtra *sender) { RecordLayer::openPresets(sender); });
     btn->setPosition(ccp(-177.5, -97));
 
     menu->addChild(btn);
@@ -882,8 +863,7 @@ bool RecordLayer::init() {
         CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
     spr->setScale(0.65f);
 
-    btn = CCMenuItemSpriteExtra::create(
-        spr, this, menu_selector(RenderSettingsLayer::open));
+    btn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { RenderSettingsLayer::open(sender); });
     btn->setPosition(ccp(-129.5, -97));
     menu->addChild(btn);
 
@@ -974,8 +954,7 @@ bool RecordLayer::init() {
     ButtonSprite *spriteOff2 = ButtonSprite::create("Start");
     spriteOff2->setScale(0.74f);
 
-    renderToggle = CCMenuItemToggler::create(
-        spriteOff2, spriteOn2, this, menu_selector(RecordLayer::toggleRender));
+    renderToggle = CCMenuItemExt::createToggler(spriteOn2, spriteOff2, [this](CCMenuItemToggler *sender) { RecordLayer::toggleRender(sender); });
     renderToggle->toggle(g.renderer.recording);
     renderToggle->setPosition(ccp(-65.5, -100));
     menu->addChild(renderToggle);
@@ -985,23 +964,20 @@ bool RecordLayer::init() {
     ButtonSprite *spriteOff2 = ButtonSprite::create("N/A");
     spriteOff2->setScale(0.74f);
 
-    renderToggle = CCMenuItemToggler::create(
-        spriteOn2, spriteOff2, this, menu_selector(RecordLayer::toggleRender2));
+    renderToggle = CCMenuItemExt::createToggler(spriteOff2, spriteOn2, [this](CCMenuItemToggler *sender) { RecordLayer::toggleRender2(sender); });
     renderToggle->setPosition(ccp(-65.5, -100));
     menu->addChild(renderToggle);
 #endif
 
     spr = CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png");
     spr->setScale(0.65f);
-    btn = CCMenuItemSpriteExtra::create(spr, this,
-                                        menu_selector(RecordLayer::macroInfo));
+    btn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { RecordLayer::macroInfo(sender); });
     btn->setPosition(ccp(-36, 107));
     menu->addChild(btn);
 
     spr = CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
     spr->setScale(0.58f);
-    btn = CCMenuItemSpriteExtra::create(spr, this,
-                                        menu_selector(RecordLayer::updatePage));
+    btn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { RecordLayer::updatePage(sender); });
     btn->setPosition(ccp(-5, 0));
     btn->setID("page-left");
     menu->addChild(btn);
@@ -1009,8 +985,7 @@ bool RecordLayer::init() {
     spr = CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png");
     spr->setScale(0.58f);
     spr->setScaleX(-0.58f);
-    btn = CCMenuItemSpriteExtra::create(spr, this,
-                                        menu_selector(RecordLayer::updatePage));
+    btn = CCMenuItemExt::createSpriteExtra(spr, [this](CCMenuItemSpriteExtra *sender) { RecordLayer::updatePage(sender); });
     btn->setPosition(ccp(209, 4.3));
     btn->setContentSize({26, 32.4});
     menu->addChild(btn);
@@ -1034,8 +1009,7 @@ bool RecordLayer::init() {
     CCSprite *dickordSpr =
         CCSprite::createWithSpriteFrameName("gj_discordIcon_001.png");
     dickordSpr->setScale(0.9f);
-    CCMenuItemSpriteExtra *dickordBtn = CCMenuItemSpriteExtra::create(
-        dickordSpr, this, menu_selector(RecordLayer::onDiscord));
+    CCMenuItemSpriteExtra *dickordBtn = CCMenuItemExt::createSpriteExtra(dickordSpr, [this](CCMenuItemSpriteExtra *sender) { RecordLayer::onDiscord(sender); });
     dickordBtn->setPosition((CCDirector::sharedDirector()->getWinSize() / 2 -
                              m_size / 2 + ccp(-16, 16)));
     m_buttonMenu->addChild(dickordBtn);
@@ -1077,18 +1051,13 @@ void RecordLayer::loadSetting(RecordSetting sett, float yPos) {
     nodes.push_back(static_cast<CCNode *>(lbl));
     menu->addChild(lbl);
 
-    CCSprite *spriteOn =
-        CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
-    CCSprite *spriteOff =
-        CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
     float toggleScale = 0.555f;
 
     if (sett.disabled) {
         // Code when disabled xD!
     }
 
-    CCMenuItemToggler *toggle = CCMenuItemToggler::create(
-        spriteOff, spriteOn, this, menu_selector(RecordLayer::toggleSetting));
+    CCMenuItemToggler *toggle = CCMenuItemExt::createTogglerWithStandardSprites(toggleScale, [this](CCMenuItemToggler *sender) { RecordLayer::toggleSetting(sender); });
     toggle->setPosition(ccp(175, yPos));
     toggle->setScale(toggleScale);
     toggle->toggle(mod->getSavedValue<bool>(sett.id));
@@ -1109,7 +1078,7 @@ void RecordLayer::loadSetting(RecordSetting sett, float yPos) {
         spr->setOpacity(215);
 
         CCMenuItemSpriteExtra *btn =
-            CCMenuItemSpriteExtra::create(spr, this, sett.callback);
+            CCMenuItemExt::createSpriteExtra(spr, this, sett.callback);
         btn->setPosition(ccp(138, yPos));
 
         nodes.push_back(static_cast<CCNode *>(btn));
@@ -1127,8 +1096,10 @@ void RecordLayer::loadSetting(RecordSetting sett, float yPos) {
         folderIcon->setScale(0.7f);
         emptyBtn->addChild(folderIcon);
 
-        CCMenuItemSpriteExtra *btn = CCMenuItemSpriteExtra::create(
-            emptyBtn, this, menu_selector(RecordLayer::onAutosaves));
+        CCMenuItemSpriteExtra *btn = CCMenuItemExt::createSpriteExtra(
+            emptyBtn, [this](CCMenuItemSpriteExtra *sender) {
+                this->onAutosaves(sender);
+            });
         btn->setPosition(ccp(147, yPos));
 
         nodes.push_back(static_cast<CCNode *>(btn));

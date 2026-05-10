@@ -14,17 +14,21 @@ class $modify(PlayLayer) {
 
 #ifndef GEODE_IS_IOS
         if (g.state != state::none && g.frameLabel && !g.renderer.recording) {
-            m_fields->frameLabel->setString(
-                ("Frame: " +
-                 geode::utils::numToString(Global::getCurrentFrame()))
-                    .c_str());
+            if (m_fields->frameLabel) {
+                m_fields->frameLabel->setString(
+                    ("Frame: " +
+                     geode::utils::numToString(Global::getCurrentFrame()))
+                        .c_str());
+            }
         }
 #else
         if (g.state != state::none && g.frameLabel) {
-            m_fields->frameLabel->setString(
-                ("Frame: " +
-                 geode::utils::numToString(Global::getCurrentFrame()))
-                    .c_str());
+            if (m_fields->frameLabel) {
+                m_fields->frameLabel->setString(
+                    ("Frame: " +
+                     geode::utils::numToString(Global::getCurrentFrame()))
+                        .c_str());
+            }
         }
 #endif
     }
@@ -36,7 +40,7 @@ class $modify(PlayLayer) {
         Interface::addButtons(this);
 
         m_fields->frameLabel = static_cast<CCLabelBMFont *>(
-            m_uiLayer->getChildByID("frame_label"_spr));
+            m_uiLayer->getChildByID("frame-label"_spr));
     }
 };
 
@@ -107,10 +111,12 @@ void Interface::updateLabels() {
     if (!pl)
         return;
 
-    if (g.state == state::none || !g.frameLabel)
-        static_cast<CCLabelBMFont *>(
-            pl->m_uiLayer->getChildByID("frame-label"_spr))
-            ->setString("");
+    if (g.state == state::none || !g.frameLabel) {
+        if (auto label = typeinfo_cast<CCLabelBMFont *>(
+                pl->m_uiLayer->getChildByID("frame-label"_spr))) {
+            label->setString("");
+        }
+    }
 
     CCLabelBMFont *label = typeinfo_cast<CCLabelBMFont *>(
         pl->m_uiLayer->getChildByID("state-label"_spr));
