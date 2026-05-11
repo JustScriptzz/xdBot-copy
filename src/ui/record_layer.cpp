@@ -1075,7 +1075,11 @@ void RecordLayer::loadSetting(RecordSetting sett, float yPos) {
         spr->setOpacity(215);
 
         CCMenuItemSpriteExtra *btn =
-            CCMenuItemExt::createSpriteExtra(spr, [this, sett](CCMenuItemSpriteExtra* sender) { sett.callback; });
+            CCMenuItemExt::createSpriteExtra(spr, [this, sett](CCMenuItemSpriteExtra* sender) {
+                if (sett.callback) {
+                    (this->*sett.callback)(sender);
+                }
+            });
         btn->setPosition(ccp(138, yPos));
 
         nodes.push_back(static_cast<CCNode *>(btn));
