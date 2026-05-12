@@ -46,10 +46,20 @@ static HeldButtonState& heldButtonState() {
 }
 
 struct PracticeCheckpointData {
+    CheckpointObject* checkpoint = nullptr;
     SupplementalPlayerState p1, p2;
     SupplementalPlayLayerState pl;
-    float tps = 240.f;
+    double tps = 240.0;
     bool tpsEnabled = false;
+    int frame = 0;
+    int previousFrame = 0;
+    int respawnFrame = -1;
+    int frameOffset = 0;
+    double schedulerOverflow = 0.0;
+    size_t currentAction = 0;
+    size_t currentFrameFix = 0;
+    std::vector<input> inputs;
+    std::vector<gdr_legacy::FrameFix> frameFixes;
     gd::unordered_map<int, int> persistentItemMap;
     std::array<float, 2000> varianceValues = {};
     std::vector<GameObject*> calcNonEffectObjects;
@@ -59,6 +69,7 @@ struct PracticeCheckpointData {
 
     PracticeCheckpointData() = default;
     PracticeCheckpointData(
+        CheckpointObject* checkpointObj,
         PlayerObject* p1Obj,
         PlayerObject* p2Obj,
         PlayLayer* plObj,
@@ -66,6 +77,7 @@ struct PracticeCheckpointData {
     ) {
         if (!plObj || !p1Obj)
             return;
+        checkpoint = checkpointObj;
         pl = SupplementalPlayLayerState(plObj);
         p1 = SupplementalPlayerState(p1Obj);
         if (p2Obj)
@@ -80,6 +92,15 @@ struct PracticeCheckpointData {
         auto& g = Global::get();
         tps = g.tps;
         tpsEnabled = g.tpsEnabled;
+        frame = Global::getCurrentFrame();
+        previousFrame = g.previousFrame;
+        respawnFrame = g.respawnFrame;
+        frameOffset = g.frameOffset;
+        schedulerOverflow = g.schedulerOverflow;
+        currentAction = g.currentAction;
+        currentFrameFix = g.currentFrameFix;
+        inputs = g.macro.inputs;
+        frameFixes = g.macro.frameFixes;
     }
 
     void apply(PlayerObject* p1Obj, PlayerObject* p2Obj, PlayLayer* plObj) const {
@@ -111,14 +132,67 @@ struct PracticeCheckpointData {
             g.setTpsEnabled(tpsEnabled);
         GameToolbox::fast_srand(randomSeed);
     }
+
+    void applyMacroState() const {
+        auto& g = Global::get();
+        bool previousIgnore = g.ignoreRecordAction;
+        g.ignoreRecordAction = true;
+
+        if (g.state == state::recording) {
+            g.macro.inputs = inputs;
+            g.macro.frameFixes = frameFixes;
+        }
+
+        g.m_frameCount = frame;
+        g.previousFrame = previousFrame;
+        g.respawnFrame = respawnFrame;
+        g.frameOffset = frameOffset;
+        g.schedulerOverflow = schedulerOverflow;
+
+        int targetFrame = frame - frameOffset;
+        g.currentAction = 0;
+        while (g.currentAction < g.macro.inputs.size() &&
+               g.macro.inputs[g.currentAction].frame < targetFrame)
+            g.currentAction++;
+
+        g.currentFrameFix = 0;
+        while (g.currentFrameFix < g.macro.frameFixes.size() &&
+               g.macro.frameFixes[g.currentFrameFix].frame < targetFrame)
+            g.currentFrameFix++;
+
+        g.ignoreRecordAction = previousIgnore;
+    }
+
+    CheckpointData toGlobalCheckpoint() const {
+        return CheckpointData{
+            frame,
+            p1,
+            p2,
+            static_cast<uintptr_t>(randomSeed),
+            previousFrame
+        };
+    }
 };
 
 class $modify(FixPlayLayer, PlayLayer) {
     struct Fields {
-        std::unordered_map<CheckpointObject*, PracticeCheckpointData> m_checkpoints;
-        std::unordered_map<CheckpointObject*, std::vector<input>> m_checkpointInputs;
-        std::unordered_map<CheckpointObject*, std::vector<gdr_legacy::FrameFix>> m_checkpointFrameFixes;
-        std::unordered_map<CheckpointObject*, int> m_checkpointFrames;
+        std::vector<PracticeCheckpointData> m_checkpoints;
+
+        PracticeCheckpointData* findCheckpoint(CheckpointObject* checkpoint) {
+            auto it = std::find_if(m_checkpoints.begin(), m_checkpoints.end(),
+                [checkpoint](PracticeCheckpointData const& data) {
+                    return data.checkpoint == checkpoint;
+                });
+            return it == m_checkpoints.end() ? nullptr : &*it;
+        }
+
+        void removeCheckpoint(CheckpointObject* checkpoint) {
+            m_checkpoints.erase(std::remove_if(m_checkpoints.begin(), m_checkpoints.end(),
+                [checkpoint](PracticeCheckpointData const& data) {
+                    return data.checkpoint == checkpoint;
+                }),
+                m_checkpoints.end());
+        }
     };
 
     static void onModify(auto& self) {
@@ -131,6 +205,9 @@ class $modify(FixPlayLayer, PlayLayer) {
         bool shouldFix = PracticeFix::shouldEnable();
         auto& g = Global::get();
         bool wasRecordingOrPlaying = g.state == state::recording || g.state == state::playing;
+        std::optional<PracticeCheckpointData> snapshot;
+        if (auto* data = m_fields->findCheckpoint(checkpoint))
+            snapshot = *data;
 
         Macro::tryAutosave(m_level, checkpoint);
 
@@ -142,73 +219,40 @@ class $modify(FixPlayLayer, PlayLayer) {
         PlayLayer::loadFromCheckpoint(checkpoint);
         resetTPSBypassState();
 
-        if (shouldFix) {
-            auto it = m_fields->m_checkpoints.find(checkpoint);
-            if (it != m_fields->m_checkpoints.end())
-                it->second.apply(m_player1, m_gameState.m_isDualMode ? m_player2 : nullptr, this);
-        }
-
-        if (wasRecordingOrPlaying) {
-            auto inputIt = m_fields->m_checkpointInputs.find(checkpoint);
-            if (inputIt != m_fields->m_checkpointInputs.end()) {
-                g.ignoreRecordAction = true;
-                if (g.state == state::recording)
-                    g.macro.inputs = inputIt->second;
-                auto frameIt = m_fields->m_checkpointFrames.find(checkpoint);
-                if (frameIt != m_fields->m_checkpointFrames.end()) {
-                    int savedFrame = frameIt->second;
-                    g.m_frameCount = savedFrame;
-                    int targetFrame = g.m_frameCount - g.frameOffset;
-                    if (g.state == state::recording) {
-                        g.macro.inputs.erase(std::remove_if(g.macro.inputs.begin(), g.macro.inputs.end(),
-                            [targetFrame](const input& inp) { return inp.frame >= targetFrame; }),
-                            g.macro.inputs.end());
-                        auto fixIt = m_fields->m_checkpointFrameFixes.find(checkpoint);
-                        if (fixIt != m_fields->m_checkpointFrameFixes.end())
-                            g.macro.frameFixes = fixIt->second;
-                    }
-                    g.currentAction = 0;
-                    while (g.currentAction < g.macro.inputs.size() &&
-                           g.macro.inputs[g.currentAction].frame < targetFrame)
-                        g.currentAction++;
-                    g.currentFrameFix = 0;
-                    while (g.currentFrameFix < g.macro.frameFixes.size() &&
-                           g.macro.frameFixes[g.currentFrameFix].frame < targetFrame)
-                        g.currentFrameFix++;
-                }
-                g.ignoreRecordAction = false;
-            }
+        if (snapshot) {
+            if (shouldFix)
+                snapshot->apply(m_player1, m_gameState.m_isDualMode ? m_player2 : nullptr, this);
+            if (wasRecordingOrPlaying)
+                snapshot->applyMacroState();
         }
     }
 
     CheckpointObject* createCheckpoint() {
         auto* checkpoint = PlayLayer::createCheckpoint();
         if (!checkpoint) return checkpoint;
-        if (PracticeFix::shouldEnable()) {
-            m_fields->m_checkpoints[checkpoint] = PracticeCheckpointData(
+        bool shouldSave = PracticeFix::shouldEnable() || Global::get().state == state::recording || Global::get().state == state::playing;
+        if (shouldSave) {
+            PracticeCheckpointData data(
+                checkpoint,
                 m_player1,
                 m_gameState.m_isDualMode ? m_player2 : nullptr,
                 this,
                 brokenPracticeObjects()
             );
-        }
-        auto& g = Global::get();
-        if (g.state == state::recording || g.state == state::playing) {
-            g.ignoreRecordAction = true;
-            m_fields->m_checkpointInputs[checkpoint] = g.macro.inputs;
-            m_fields->m_checkpointFrameFixes[checkpoint] = g.macro.frameFixes;
-            m_fields->m_checkpointFrames[checkpoint] = Global::getCurrentFrame();
-            g.ignoreRecordAction = false;
+            m_fields->removeCheckpoint(checkpoint);
+            m_fields->m_checkpoints.push_back(data);
+
+            auto& g = Global::get();
+            if (g.state == state::recording)
+                g.checkpoints[checkpoint] = data.toGlobalCheckpoint();
         }
         return checkpoint;
     }
 
     void removeCheckpoint(CheckpointObject* checkpoint) {
         PlayLayer::removeCheckpoint(checkpoint);
-        m_fields->m_checkpoints.erase(checkpoint);
-        m_fields->m_checkpointInputs.erase(checkpoint);
-        m_fields->m_checkpointFrameFixes.erase(checkpoint);
-        m_fields->m_checkpointFrames.erase(checkpoint);
+        m_fields->removeCheckpoint(checkpoint);
+        Global::get().checkpoints.erase(checkpoint);
     }
 
     void resetLevel() {
@@ -222,9 +266,7 @@ class $modify(FixPlayLayer, PlayLayer) {
 
         if (!hadCheckpoints) {
             m_fields->m_checkpoints.clear();
-            m_fields->m_checkpointInputs.clear();
-            m_fields->m_checkpointFrameFixes.clear();
-            m_fields->m_checkpointFrames.clear();
+            Global::get().checkpoints.clear();
             brokenPracticeObjects().clear();
         }
         PlayLayer::resetLevel();

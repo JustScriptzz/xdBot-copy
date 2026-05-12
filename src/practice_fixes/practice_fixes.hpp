@@ -20,7 +20,7 @@ class PracticeFix {
         if (!pl->m_isPracticeMode)
             return false;
 
-        return g.state == state::recording || g.state == state::playing;
+        return g.alwaysPracticeFixes || g.state == state::recording || g.state == state::playing;
     }
 };
 
