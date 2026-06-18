@@ -4,6 +4,7 @@ on:
     paths:
       - 'zilko_xdbot.geode'
       - 'zilko_xdbot.pdb'
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
