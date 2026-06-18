@@ -4,6 +4,8 @@ on:
     paths:
       - 'zilko_xdbot.geode'
       - 'zilko_xdbot.pdb'
+permissions:
+  contents: write
 jobs:
   upload:
     runs-on: ubuntu-latest
